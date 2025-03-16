@@ -1,6 +1,8 @@
-package com.example.todoapp.ui
+package com.example.todoapp.ui.home
 
 import androidx.lifecycle.ViewModel
+import com.example.todoapp.data.Task
+import com.example.todoapp.data.TasksRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -9,7 +11,7 @@ data class HomeUiState(
     val taskList: List<Task> = listOf()
 )
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel(private val repository: TasksRepository) : ViewModel() {
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 

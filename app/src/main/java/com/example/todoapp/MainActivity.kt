@@ -4,31 +4,40 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.todoapp.ui.HomeScreen
+import androidx.lifecycle.ViewModelProvider
+import com.example.todoapp.data.TasksRepository
+import com.example.todoapp.data.tasksRepository
+import com.example.todoapp.ui.home.HomeScreen
+import com.example.todoapp.ui.home.HomeViewModel
+import com.example.todoapp.ui.home.HomeViewModelFactory
 import com.example.todoapp.ui.theme.TodoAppTheme
 
 class MainActivity : ComponentActivity() {
+
+    private val homeViewModel: HomeViewModel by lazy {
+        ViewModelProvider(this, HomeViewModelFactory(tasksRepository))
+            .get(HomeViewModel::class.java)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             TodoAppTheme {
-                HomeScreen()
+                HomeScreen(homeViewModel)
             }
         }
     }
 }
+
+
+/*
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     TodoAppTheme {
         HomeScreen()
     }
-}
+}*/
