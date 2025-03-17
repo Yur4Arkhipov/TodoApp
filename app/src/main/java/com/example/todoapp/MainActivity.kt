@@ -30,7 +30,6 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TodoAppTheme {
-//                HomeScreen(homeViewModel)
                 AppNavGraph(
                     homeViewModel = homeViewModel,
                     taskEntryViewModel = taskEntryViewModel
