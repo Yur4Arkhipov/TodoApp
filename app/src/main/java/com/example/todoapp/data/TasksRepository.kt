@@ -8,7 +8,11 @@ data class Task(
 )
 
 class TasksRepository {
-    var list: MutableList<Task> = mutableListOf()
+    var list: MutableList<Task> = mutableListOf(
+        Task(1, "Homework", "Do math homework", false),
+        Task(2, "Game", "Play basketball", false),
+        Task(3, "TV", "Watch about frog", true),
+    )
 }
 
 val tasksRepository by lazy { TasksRepository() }

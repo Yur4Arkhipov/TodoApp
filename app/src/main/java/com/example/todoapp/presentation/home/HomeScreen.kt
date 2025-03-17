@@ -1,4 +1,4 @@
-package com.example.todoapp.ui.home
+package com.example.todoapp.presentation.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,13 +10,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -30,11 +33,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.todoapp.R
 import com.example.todoapp.data.Task
-import com.example.todoapp.navigation.NavigationDestination
-import com.example.todoapp.ui.theme.TodoAppTheme
+import com.example.todoapp.presentation.navigation.NavigationDestination
+import com.example.todoapp.presentation.theme.TodoAppTheme
 
 object HomeDestination : NavigationDestination {
     override val route = "home"
@@ -45,6 +47,7 @@ object HomeDestination : NavigationDestination {
 @OptIn(ExperimentalMaterial3Api::class)
 fun HomeScreen(
     homeViewModel: HomeViewModel,
+    navigateToTaskEntry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -54,17 +57,18 @@ fun HomeScreen(
         topBar = {
             TaskTopAppBar(
                 title = stringResource(HomeDestination.titleRes),
-                scrollBehavior = scrollBehavior
+                canNavigateBack = false,
+                scrollBehavior = scrollBehavior,
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { TODO() }) {
+            FloatingActionButton(onClick = { navigateToTaskEntry() }) {
                 Icon(Icons.Default.Add, contentDescription = null)
             }
         }
     ) { innerPadding ->
         HomeBody(
-            taskList = homeUiState.taskList,
+            taskList = homeUiState.tasks,
             modifier = modifier.padding(innerPadding)
         )
     }
@@ -74,16 +78,25 @@ fun HomeScreen(
 @Composable
 fun TaskTopAppBar(
     title: String,
+    canNavigateBack: Boolean,
+    modifier: Modifier = Modifier,
     scrollBehavior: TopAppBarScrollBehavior? = null,
-    modifier: Modifier = Modifier
+    navigateToHome: () -> Unit = {}
 ) {
     CenterAlignedTopAppBar(
         title = { Text(title) },
         modifier = modifier,
         scrollBehavior = scrollBehavior,
-//        navigationIcon = {
-//            TODO()
-//        }
+        navigationIcon = {
+            if(canNavigateBack) {
+                IconButton(onClick = navigateToHome) {
+                    Icon(
+                        imageVector =Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = null
+                    )
+                }
+            }
+        }
     )
 }
 

@@ -1,4 +1,4 @@
-package com.example.todoapp.navigation
+package com.example.todoapp.presentation.navigation
 
 interface NavigationDestination {
     val route: String
