@@ -1,38 +1,46 @@
 package com.example.todoapp.presentation.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.example.todoapp.data.tasksRepository
+import androidx.navigation.navArgument
 import com.example.todoapp.presentation.home.HomeDestination
 import com.example.todoapp.presentation.home.HomeScreen
-import com.example.todoapp.presentation.home.HomeViewModel
+import com.example.todoapp.presentation.task.TaskDetailsDestination
+import com.example.todoapp.presentation.task.TaskDetailsScreen
 import com.example.todoapp.presentation.task.TaskEntryDestination
 import com.example.todoapp.presentation.task.TaskEntryScreen
-import com.example.todoapp.presentation.task.TaskEntryViewModel
 
 @Composable
-fun AppNavGraph(
-    homeViewModel: HomeViewModel,
-    taskEntryViewModel: TaskEntryViewModel
+fun AppNavHost(
+    navController: NavHostController,
+    modifier: Modifier = Modifier,
 ) {
-    val navController = rememberNavController()
-
     NavHost(
         navController = navController,
-        startDestination = HomeDestination.route
+        startDestination = HomeDestination.route,
+        modifier = modifier
     ) {
         composable(route = HomeDestination.route) {
             HomeScreen(
                 navigateToTaskEntry = { navController.navigate(TaskEntryDestination.route) },
-                homeViewModel = homeViewModel,
+                navigateToTaskDetails = { navController.navigate("${TaskDetailsDestination.route}/$it") },
             )
         }
         composable(route = TaskEntryDestination.route) {
             TaskEntryScreen(
                 navigateToHome = { navController.popBackStack() },
-                taskEntryViewModel = taskEntryViewModel
+            )
+        }
+        composable(
+            route = TaskDetailsDestination.routeWithArgs,
+            arguments = listOf(navArgument(TaskDetailsDestination.taskIdArg) { type = NavType.IntType })
+        ) {
+            TaskDetailsScreen(
+                navigateToHome = { navController.popBackStack() },
             )
         }
     }

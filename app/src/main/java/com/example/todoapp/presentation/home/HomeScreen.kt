@@ -1,5 +1,6 @@
 package com.example.todoapp.presentation.home
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,7 +13,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -33,8 +33,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.todoapp.R
 import com.example.todoapp.data.Task
+import com.example.todoapp.presentation.AppViewModelProvider
 import com.example.todoapp.presentation.navigation.NavigationDestination
 import com.example.todoapp.presentation.theme.TodoAppTheme
 
@@ -46,9 +49,10 @@ object HomeDestination : NavigationDestination {
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun HomeScreen(
-    homeViewModel: HomeViewModel,
     navigateToTaskEntry: () -> Unit,
-    modifier: Modifier = Modifier
+    navigateToTaskDetails: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    homeViewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val homeUiState by homeViewModel.uiState.collectAsState()
@@ -69,6 +73,7 @@ fun HomeScreen(
     ) { innerPadding ->
         HomeBody(
             taskList = homeUiState.tasks,
+            onTaskClick = navigateToTaskDetails,
             modifier = modifier.padding(innerPadding)
         )
     }
@@ -103,6 +108,7 @@ fun TaskTopAppBar(
 @Composable
 fun HomeBody(
     taskList: List<Task>,
+    onTaskClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -116,7 +122,10 @@ fun HomeBody(
                 Text(text = "No tasks found")
             }
         } else {
-            TaskList(taskList)
+            TaskList(
+                taskList = taskList,
+                onTaskClick = { onTaskClick(it.id) }
+            )
         }
     }
 }
@@ -125,14 +134,18 @@ fun HomeBody(
 @Composable
 fun TaskList(
     taskList: List<Task>,
+    onTaskClick: (Task) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
         contentPadding = PaddingValues(10.dp),
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
-        items(taskList) { task ->
-            TaskItem(task)
+        items(items = taskList, key = { it.id }) { task ->
+            TaskItem(
+                item = task,
+                modifier = modifier.clickable { onTaskClick(task) }
+            )
         }
     }
 }
@@ -164,56 +177,39 @@ private fun TaskItem(
                     .size(40.dp)
             )
             Column(
-                modifier = Modifier.weight(6f)
+                modifier = Modifier.weight(6f).align(Alignment.CenterVertically),
             ) {
                 Text(
-                    text = item.title
-                )
-                Text(
-                    text = item.description,
+                    text = item.title ?: "null",
+                    fontSize = 24.sp,
                 )
             }
         }
     }
 }
 
-/*@Preview(
-    showSystemUi = true
-)
+@Preview(showBackground = true)
 @Composable
-fun PreviewHomeScreen() {
+fun HomeBodyPreview() {
     TodoAppTheme {
-        HomeScreen()
-    }
-}*/
-
-/*@Preview(showBackground = true)
-@Composable
-fun HomeBodyEmptyListPreview() {
-    MVVMTodoAppTheme {
-        HomeBody(listOf(), onItemClick = {})
-    }
-}*/
-
-@Preview
-@Composable
-fun PreviewTodoItem() {
-    TodoAppTheme {
-        TaskItem(Task(1, "Homework", "Do math homework", true))
+        HomeBody(
+            taskList = listOf(
+                Task(1, "Homework", "Do math homework", false),
+                Task(2, "Game", "Play basketball", false),
+                Task(3, "TV", "Watch about frog", true)
+            ),
+            onTaskClick = {}
+        )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun TaskListPreview() {
-    TodoAppTheme() {
-        TaskList(
-            listOf(
-                Task(1, "Homework", "Do math homework", false),
-                Task(2, "Game", "Play basketball", false),
-                Task(3, "TV", "Watch about frog", true)
-            ),
-//            onItemClick = {}
+fun HomeBodyEmptyListPreview() {
+    TodoAppTheme {
+        HomeBody(
+            taskList = emptyList(),
+            onTaskClick = {}
         )
     }
 }

@@ -1,18 +1,16 @@
 package com.example.todoapp.data
 
-data class Task(
-    val id: Int = 0,
-    val title: String,
-    val description: String,
-    val isCompleted: Boolean
-)
+import kotlinx.coroutines.flow.Flow
 
-class TasksRepository {
-    var list: MutableList<Task> = mutableListOf(
-        Task(1, "Homework", "Do math homework", false),
-        Task(2, "Game", "Play basketball", false),
-        Task(3, "TV", "Watch about frog", true),
-    )
+interface TasksRepository {
+
+    suspend fun insert(task: Task)
+
+    fun getAllTasksStream(): Flow<List<Task>>
+
+    fun getTaskStream(id: Int): Flow<Task?>
+
+    suspend fun getTaskById(taskId: Int): Task
+
+    suspend fun deleteItem(item: Task)
 }
-
-val tasksRepository by lazy { TasksRepository() }

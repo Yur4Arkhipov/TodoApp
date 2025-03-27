@@ -9,16 +9,18 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.todoapp.R
-import com.example.todoapp.presentation.navigation.NavigationDestination
+import com.example.todoapp.presentation.AppViewModelProvider
 import com.example.todoapp.presentation.home.TaskTopAppBar
+import com.example.todoapp.presentation.navigation.NavigationDestination
+import com.example.todoapp.presentation.theme.TodoAppTheme
+import kotlinx.coroutines.launch
 
 
 object TaskEntryDestination : NavigationDestination {
@@ -29,47 +31,51 @@ object TaskEntryDestination : NavigationDestination {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskEntryScreen(
-    taskEntryViewModel: TaskEntryViewModel,
     navigateToHome: () -> Unit,
+    canNavigateBack: Boolean = true,
+    taskEntryViewModel: TaskEntryViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
+    val coroutineScope = rememberCoroutineScope()
+
     Scaffold(
         topBar = {
             TaskTopAppBar(
                 title = stringResource(TaskEntryDestination.titleRes),
-                canNavigateBack = true,
+                canNavigateBack = canNavigateBack,
                 navigateToHome = navigateToHome
             )
         }
     ) { innerPadding ->
         TaskEntryBody(
-            taskEntryViewModel = taskEntryViewModel,
-            Modifier.padding(innerPadding)
+            taskUiState = taskEntryViewModel.taskUiState,
+            onTaskValueChange = taskEntryViewModel::updateUiState,
+            onSaveClick = {
+                coroutineScope.launch {
+                    taskEntryViewModel.saveItem()
+                    navigateToHome()
+                }
+            },
+            modifier = Modifier.padding(innerPadding)
         )
     }
 }
 
 @Composable
 fun TaskEntryBody(
-    taskEntryViewModel: TaskEntryViewModel,
-    modifier: Modifier = Modifier,
+    taskUiState: TaskUiState,
+    onTaskValueChange: (TaskDetails) -> Unit,
+    onSaveClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    var title by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-
     Column(
         modifier = modifier
     ) {
         TaskInputForm(
-            title = title,
-            onTitleChange = { title = it},
-            description = description,
-            onDescriptionChange = { description = it }
+            taskDetails = taskUiState.taskDetails,
+            onValueChange = onTaskValueChange,
         )
         Button(
-            onClick = { taskEntryViewModel.addTask(
-                title = title,
-                description = description
-            ) },
+            onClick = onSaveClick,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
             Text("Save")
@@ -79,39 +85,35 @@ fun TaskEntryBody(
 
 @Composable
 fun TaskInputForm(
-    title: String,
-    onTitleChange: (String) -> Unit,
-    description: String,
-    onDescriptionChange: (String) -> Unit,
-    modifier: Modifier = Modifier
+    taskDetails:TaskDetails,
+    modifier: Modifier = Modifier,
+    onValueChange: (TaskDetails) -> Unit = {},
 ) {
-    Column() {
+    Column {
         OutlinedTextField(
-            value = title,
-            onValueChange = onTitleChange,
+            value = taskDetails.title,
+            onValueChange = { onValueChange(taskDetails.copy(title = it)) },
             label = { Text("Input title") },
-            modifier = modifier.fillMaxWidth()
+            modifier = modifier.fillMaxWidth(),
+            singleLine = true
         )
         OutlinedTextField(
-            value = description,
-            onValueChange = onDescriptionChange,
+            value = taskDetails.description,
+            onValueChange = { onValueChange(taskDetails.copy(description = it)) },
             label = { Text("Input description") },
-            modifier = modifier.fillMaxWidth()
+            modifier = modifier.fillMaxWidth(),
+            singleLine = true
         )
     }
 }
-
-/*@Preview
+@Preview(showBackground = true)
 @Composable
-fun TaskInputFormPreview() {
-    TaskInputForm()
-}*/
-
-//@OptIn(ExperimentalMaterial3Api::class)
-//@Preview(
-//    showSystemUi = true
-//)
-//@Composable
-//fun TaskEntryBodyPreview() {
-//    TaskEntryScreen()
-//}
+private fun ItemEntryScreenPreview() {
+    TodoAppTheme {
+        TaskEntryBody(taskUiState = TaskUiState(
+            TaskDetails(
+                title = "Title", description = "Description"
+            )
+        ), onTaskValueChange = {}, onSaveClick = {})
+    }
+}
