@@ -1,5 +1,8 @@
-package com.example.todoapp.data
+package com.example.todoapp.data.repository
 
+import com.example.todoapp.data.Task
+import com.example.todoapp.data.TaskDao
+import com.example.todoapp.data.TasksRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow

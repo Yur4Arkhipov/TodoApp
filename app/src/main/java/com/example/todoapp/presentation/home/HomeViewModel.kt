@@ -9,9 +9,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
-data class HomeUiState(val tasks: List<Task> = emptyList())
+data class HomeUiState(
+    val tasks: List<Task> = emptyList()
+)
 
-class HomeViewModel(repository: TasksRepository) : ViewModel() {
+class HomeViewModel(
+    private val repository: TasksRepository,
+) : ViewModel() {
 
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
